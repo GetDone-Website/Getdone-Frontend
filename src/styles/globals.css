@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   Token tema GetDone. Nilai terang diambil dari style.css asli (Tailwind v3.4.17 hasil kompilasi);
+   nilai gelap ada di blok .dark. Format "R G B" agar modifier opacity (bg-surface/85) tetap jalan.
+   ========================================================================== */
+@layer base {
+  :root {
+    --c-background: 255 248 243;
+    --c-surface: 255 248 243;
+    --c-surface-clean: 255 255 255;
+    --c-surface-muted: 237 237 233;
+    --c-surface-dim: 226 217 206;
+    --c-surface-variant: 235 225 214;
+    --c-surface-container-lowest: 255 255 255;
+    --c-surface-container-low: 252 242 231;
+    --c-surface-container: 246 236 225;
+    --c-surface-container-high: 241 231 220;
+    --c-surface-container-highest: 235 225 214;
+    --c-on-surface: 31 27 20;
+    --c-on-surface-variant: 63 73 73;
+    --c-inverse-surface: 53 48 40;
+    --c-text-muted: 92 103 125;
+    --c-border-subtle: 227 213 202;
+    --c-primary: 0 74 76;
+    --c-primary-container: 0 100 102;
+    --c-primary-fixed: 163 240 241;
+    --c-primary-fixed-dim: 135 211 213;
+    --c-on-primary: 255 255 255;
+    --c-on-primary-fixed: 0 32 33;
+    --c-on-primary-fixed-variant: 0 79 81;
+    --c-secondary: 81 95 119;
+    --c-secondary-container: 210 224 253;
+    --c-secondary-fixed: 213 227 255;
+    --c-on-secondary: 255 255 255;
+    --c-on-secondary-fixed: 13 28 49;
+    --c-tertiary: 79 63 52;
+    --c-tertiary-container: 104 86 75;
+    --c-tertiary-fixed: 247 222 207;
+    --c-tertiary-fixed-dim: 218 194 180;
+    --c-on-tertiary: 255 255 255;
+    --c-on-tertiary-fixed: 38 25 16;
+    --c-error-container: 255 218 214;
+    --c-on-error-container: 147 0 10;
+    --c-state-done: 45 106 79;
+    --c-state-progress: 181 131 141;
+    --c-state-urgent: 186 26 26;
+    --c-cta-hover: 6 90 96;
+    color-scheme: light;
+  }
+  html.dark {
+    --c-background: 24 20 15;
+    --c-surface: 24 20 15;
+    --c-surface-clean: 33 28 22;
+    --c-surface-muted: 52 49 43;
+    --c-surface-dim: 24 20 15;
+    --c-surface-variant: 58 52 45;
+    --c-surface-container-lowest: 20 17 12;
+    --c-surface-container-low: 29 25 19;
+    --c-surface-container: 38 33 27;
+    --c-surface-container-high: 47 42 35;
+    --c-surface-container-highest: 58 52 45;
+    --c-on-surface: 236 224 213;
+    --c-on-surface-variant: 214 208 198;
+    --c-inverse-surface: 236 224 213;
+    --c-text-muted: 166 172 184;
+    --c-border-subtle: 74 66 56;
+    --c-primary: 135 211 213;
+    --c-primary-container: 94 190 192;
+    --c-primary-fixed: 0 79 81;
+    --c-primary-fixed-dim: 94 190 192;
+    --c-on-primary: 0 55 56;
+    --c-on-primary-fixed: 163 240 241;
+    --c-on-primary-fixed-variant: 163 240 241;
+    --c-secondary: 150 168 200;
+    --c-secondary-container: 56 70 94;
+    --c-secondary-fixed: 56 70 94;
+    --c-on-secondary: 13 28 49;
+    --c-on-secondary-fixed: 213 227 255;
+    --c-tertiary: 218 194 180;
+    --c-tertiary-container: 122 102 90;
+    --c-tertiary-fixed: 79 63 52;
+    --c-tertiary-fixed-dim: 160 135 120;
+    --c-on-tertiary: 38 25 16;
+    --c-on-tertiary-fixed: 247 222 207;
+    --c-error-container: 105 0 5;
+    --c-on-error-container: 255 218 214;
+    --c-state-done: 110 200 155;
+    --c-state-progress: 199 150 160;
+    --c-state-urgent: 255 140 130;
+    --c-cta-hover: 135 211 213;
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  .material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    font-feature-settings: "liga";
+    -webkit-font-smoothing: antialiased;
+  }
+}

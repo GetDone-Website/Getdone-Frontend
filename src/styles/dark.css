@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Dark mode untuk aturan di features.css / transition.css yang memakai warna hex tetap.
+   (Utilitas Tailwind sudah otomatis berganti lewat CSS variable di globals.css.)
+   Diimpor SETELAH features.css agar menang pada spesifisitas yang sama.
+   ========================================================================== */
+html.dark { background: #18140f; }
+
+/* Permukaan kartu / panel / input */
+html.dark .gd-profile-dropdown,
+html.dark .gd-sidebar-toggle,
+html.dark .gd-back-landing,
+html.dark .gd-course-tabs,
+html.dark .gd-timer-settings,
+html.dark .gd-profile-panel,
+html.dark .gd-profile-metric,
+html.dark .gd-semester-item,
+html.dark .gd-fullscreen-toggle,
+html.dark .gd-settings-toggle,
+html.dark .gd-profile-trigger { background: #211c16; color: #ece0d5; }
+html.dark .gd-profile-trigger:hover { background: #2f2a23; }
+
+html.dark .gd-intake-panel input, html.dark .gd-course-composer input,
+html.dark .gd-arrear-row input, html.dark .gd-arrear-row select,
+html.dark .gd-course-status-control select, html.dark .gd-task-status-label select,
+html.dark .gd-task-table-status, html.dark .gd-timer-settings input,
+html.dark .gd-timer-settings select { background: #2a251e; border-color: #3f382f; color: #ece0d5; }
+
+html.dark .gd-course-composer { background: #1f1b15; }
+html.dark .gd-profile-info div { background: #272219; }
+html.dark #gd-timer-focus:fullscreen { background: #18140f; }
+html.dark .gd-timer-fallback-fullscreen { background: #18140f !important; }
+html.dark .gd-profile-dropdown { box-shadow: 0 16px 40px rgba(0, 0, 0, .5); }
+html.dark .gd-profile-panel { box-shadow: 0 4px 18px rgba(0, 0, 0, .35); }
+
+/* Hover & pemisah */
+html.dark .gd-profile-dropdown a:hover, html.dark .gd-profile-dropdown button:hover,
+html.dark .gd-sidebar-toggle:hover, html.dark .gd-back-landing:hover,
+html.dark .gd-settings-toggle:hover, html.dark .gd-course-tab:hover { background: #2f2a23; color: #ece0d5; }
+html.dark .gd-profile-dropdown .gd-dropdown-divider { background: #3a342c; }
+
+/* Teks utama */
+html.dark .gd-profile-dropdown a, html.dark .gd-profile-dropdown button,
+html.dark .gd-timer-settings-heading strong, html.dark .gd-profile-panel h2,
+html.dark .gd-profile-info dd, html.dark .gd-semester-item strong,
+html.dark .gd-course-empty strong { color: #ece0d5; }
+
+/* Teks sekunder */
+html.dark .gd-course-composer label, html.dark .gd-arrear-row label,
+html.dark .gd-course-tab, html.dark .gd-course-status-control label,
+html.dark .gd-course-empty, html.dark .gd-task-status-label,
+html.dark .gd-timer-settings-heading p, html.dark .gd-timer-settings p,
+html.dark .gd-timer-fields label, html.dark .gd-task-focus-control > label,
+html.dark .gd-youtube-form > label, html.dark .gd-profile-avatar p,
+html.dark .gd-profile-info dt, html.dark .gd-profile-metric span,
+html.dark .gd-semester-item small, html.dark .gd-profile-note,
+html.dark .gd-autostart-label, html.dark .gd-autostart-hint { color: #a8a39a; }
+
+/* Aksen teal sebagai teks/ikon */
+html.dark .gd-sidebar-toggle, html.dark .gd-back-landing,
+html.dark .gd-fullscreen-toggle, html.dark .gd-settings-toggle,
+html.dark .gd-profile-metric strong,
+html.dark .gd-progress-node.gd-progress-active .gd-progress-step-label { color: #5ebec0 !important; }
+
+/* Chip hijau / peringatan */
+html.dark .gd-intake-result, html.dark .gd-course-summary, html.dark .gd-session-badge,
+html.dark .gd-semester-number, html.dark .gd-semester-state.is-current { background: #1d3a31; color: #9be0c0; }
+html.dark .gd-progress-node.gd-progress-complete > div:first-child { background: #1d3a31 !important; color: #9be0c0 !important; }
+html.dark .gd-progress-node.gd-progress-complete .gd-progress-step-label { color: #9be0c0 !important; }
+html.dark .gd-intake-result.is-warning, html.dark .gd-course-summary.is-warning,
+html.dark .gd-step-error { background: #3d2a1a; color: #f0b27a; }
+html.dark .gd-settings-message.is-warning, html.dark #gd-youtube-message.is-warning { color: #f0b27a; }
+html.dark .gd-semester-state { background: #2f2a23; color: #a8a39a; }
+html.dark .gd-arrear-remove { color: #ff8c82; }
+
+/* Tombol sekunder & segmented control */
+html.dark .gd-control-secondary { background: #2f2a23; color: #d6d0c6; }
+html.dark .gd-control-secondary:hover { background: #3a342c; }
+html.dark .gd-segmented { background: #2f2a23; }
+html.dark .gd-segmented button { color: #d6d0c6; }
+html.dark .gd-segmented button.is-active { background: #006466; color: #fff; }
+
+/* Garis/outline berbasis teal transparan agar tetap terlihat di latar gelap */
+html.dark .gd-profile-trigger, html.dark .gd-profile-dropdown, html.dark .gd-sidebar-toggle,
+html.dark .gd-back-landing, html.dark .gd-intake-panel, html.dark .gd-course-composer,
+html.dark .gd-course-tabs, html.dark .gd-timer-settings, html.dark .gd-fullscreen-toggle,
+html.dark .gd-settings-toggle, html.dark .gd-profile-panel, html.dark .gd-profile-metric,
+html.dark .gd-semester-item { border-color: rgba(94, 190, 192, .2); }

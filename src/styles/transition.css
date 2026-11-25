@@ -1,0 +1,26 @@
+/* Transisi halaman & interaksi halus */
+html{background:#fff8f3;scroll-behavior:smooth}
+a,button{touch-action:manipulation}
+@keyframes gd-in{from{opacity:0}to{opacity:1}}
+@keyframes gd-out{from{opacity:1}to{opacity:0}}
+@keyframes gd-pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:no-preference){
+  /* Browser dengan View Transitions (via http/https): sidebar & header tetap diam, konten berganti halus */
+  @view-transition{navigation:auto}
+  aside{view-transition-name:gd-side}
+  div.pl-64>header{view-transition-name:gd-top}
+  div.pl-64>main{view-transition-name:gd-main}
+  ::view-transition-old(gd-main){animation:gd-out .18s ease both}
+  ::view-transition-new(gd-main){animation:gd-in .35s ease .05s both}
+  ::view-transition-old(root){animation:gd-out .18s ease both}
+  ::view-transition-new(root){animation:gd-in .3s ease both}
+
+  /* Fallback (file:// atau browser lama): fade-in saat masuk, fade-out saat pindah */
+  html.gd-fb body>*:not(aside):not(script){animation:gd-in .35s ease both}
+  html.gd-fb.gd-leave body>*:not(aside):not(script){animation:gd-out .2s ease both}
+
+  /* Modal Mata Kuliah muncul halus */
+  #add-course-modal:not(.hidden){animation:gd-in .2s ease both}
+  #add-course-modal:not(.hidden)>div{animation:gd-pop .25s ease both}
+}

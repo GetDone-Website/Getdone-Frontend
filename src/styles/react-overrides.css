@@ -1,0 +1,40 @@
+/* Penyesuaian khusus migrasi React (tidak mengubah file CSS asli).
+   spacing-fix.css memberi padding-bottom pada <main> di semua body yang bukan .app-page.
+   Di versi HTML, halaman login/register tidak memuat spacing-fix.css, jadi dinetralkan di sini. */
+body.auth-page main { padding-bottom: 0; }
+
+/* ---------- Pomodoro: tombol sembunyikan pengaturan + panel yang bisa dilipat ---------- */
+.gd-settings-toggle {
+  display: inline-flex; align-items: center; gap: .375rem; align-self: center;
+  margin: 0 0 1rem; padding: .45rem .9rem; border-radius: 9999px;
+  border: 1px solid rgba(0, 100, 102, .15); background: #fffdf9; color: #006466;
+  font: 600 .75rem/1 "Plus Jakarta Sans", sans-serif; cursor: pointer;
+  transition: background-color .2s ease, transform .1s ease;
+}
+.gd-settings-toggle:hover { background: #f6ece1; }
+.gd-settings-toggle:active { transform: scale(.98); }
+.gd-settings-toggle:focus-visible { outline: 3px solid rgba(0, 100, 102, .3); outline-offset: 2px; }
+.gd-settings-toggle .material-symbols-outlined { font-size: 18px; }
+
+/* Lipat dengan grid-template-rows supaya tinggi beranimasi tanpa JS; elemen tetap ter-mount (audio YouTube tidak putus). */
+.gd-collapsible { display: grid; grid-template-rows: 1fr; width: 100%; transition: grid-template-rows .28s ease, margin .28s ease; }
+.gd-collapsible > .gd-collapsible-inner { min-height: 0; overflow: hidden; }
+.gd-collapsible.is-collapsed { grid-template-rows: 0fr; }
+.gd-collapsible.is-collapsed > .gd-collapsible-inner { visibility: hidden; transition: visibility 0s linear .28s; }
+.gd-collapsible:not(.is-collapsed) > .gd-collapsible-inner { overflow: visible; transition-delay: .28s; }
+@media (prefers-reduced-motion: reduce) { .gd-collapsible, .gd-collapsible.is-collapsed > .gd-collapsible-inner { transition: none; } }
+
+/* ---------- Pomodoro: pilihan Manual / Otomatis ---------- */
+.gd-autostart { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: .875rem; }
+.gd-autostart-label { font: 600 .75rem/1rem "Plus Jakarta Sans", sans-serif; color: #68717e; }
+.gd-segmented { display: inline-flex; padding: 3px; border-radius: 9999px; background: #f0e9e0; }
+.gd-segmented button {
+  padding: .35rem .9rem; border: 0; border-radius: 9999px; background: transparent; color: #39494b;
+  font: 600 .75rem/1 "Plus Jakarta Sans", sans-serif; cursor: pointer; transition: background-color .2s ease, color .2s ease;
+}
+.gd-segmented button.is-active { background: #006466; color: #fff; box-shadow: 0 2px 8px rgba(0, 100, 102, .18); }
+.gd-segmented button:focus-visible { outline: 3px solid rgba(0, 100, 102, .3); outline-offset: 1px; }
+.gd-autostart-hint { flex-basis: 100%; margin: 0; font-size: .75rem; line-height: 1rem; color: #68717e; }
+
+/* Toggle tema (dark mode) */
+.gd-theme-toggle { display: inline-flex; align-items: center; justify-content: center; padding: .375rem; border-radius: .5rem; background: transparent; border: 0; cursor: pointer; }
