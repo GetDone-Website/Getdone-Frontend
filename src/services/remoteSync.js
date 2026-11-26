@@ -39,6 +39,11 @@ const enqueue = (job) => {
 
 const enabled = () => API_ENABLED && Boolean(getToken());
 
+/** Id server untuk sebuah id lokal (id yang sudah UUID dikembalikan apa adanya). */
+export const resolveServerId = (id) => serverId(id);
+/** Menunggu antrean sinkronisasi yang sedang berjalan selesai (mis. sebelum unggah file ke mata kuliah baru). */
+export const flushSync = () => queue.catch(() => undefined);
+
 /** Dorong perubahan sebuah koleksi (courses/tasks) ke server. Aman dipanggil tanpa backend (no-op). */
 export function syncCollection(name, nextList) {
   if (!enabled() || !Array.isArray(nextList)) return;

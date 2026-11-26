@@ -25,7 +25,7 @@ export const setToken = (token) => {
   }
 };
 
-const api = axios.create({ baseURL: API_URL || undefined, timeout: 15000 });
+const api = axios.create({ baseURL: API_URL || undefined, timeout: 60000 });
 
 api.interceptors.request.use((config) => {
   const token = getToken();

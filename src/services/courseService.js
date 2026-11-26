@@ -3,6 +3,9 @@ import { API_ENABLED } from "./api.js";
 import { getOnboarding, slug, taskMatchesCourse } from "./academicData.js";
 import { syncCollection } from "./remoteSync.js";
 import { readJSON, writeJSON } from "./storage.js";
+import { DAYS, TIME_RE, applyCourseEdit, normalizeFormFields, validateCourseForm } from "./courseForm.js";
+
+export { DAYS, TIME_RE, applyCourseEdit };
 
 /**
  * Service mata kuliah.
@@ -10,9 +13,7 @@ import { readJSON, writeJSON } from "./storage.js";
  * Bila VITE_API_URL diisi, perubahan juga dikirim ke /api/courses (lihat remoteSync.js).
  */
 
-export const DAYS = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 export const ACCENTS = ["bg-primary-container", "bg-secondary", "bg-tertiary-container", "bg-state-progress", "bg-state-done", "bg-primary"];
-export const TIME_RE = /^(\d{1,2})[:.](\d{2})\s*-\s*(\d{1,2})[:.](\d{2})(\s*WITA)?$/i;
 
 const SEED = [
   { id: "s1", name: "Pemrograman Web Lanjut", code: "CS304", sks: 3, desc: "Full-stack React, Next.js, REST API & Arsitektur Mikroservis", lecturer: "Dr. Ir. Made Arya, M.T.", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDvwxW00Obt0pdl8DkAM98GlYYMvnUYBx3aiBd1MRaggav3nnx_wE4i9cktj8fjwZF3qZJYsKxO4IEnWmJxZk2G_ZQvFUgrAA000ukhDZzN4jbr1-kKlwo7WTk-qlVd5S_ZMjYeadj2tjZpfdfaSz2jkcKaSMJ0q2MrwemFmlbCUO7u2CcxB4Uq-5yRo2XNnsX2Y9KprA6XS90KWwDPAsw-9GK1OyKXTPWVOKcbtT6xMczKmUxtDnLAFA", day: "Senin", time: "08:00 - 10:30", room: "Lab Komputer 3", active: 3, progress: 65, accent: "bg-primary-container" },
@@ -33,6 +34,9 @@ function normalize(course) {
     time: course.time || "08:00 - 09:00",
     room: course.room || "Belum ditentukan",
     lecturer: course.lecturer || "Belum ditentukan",
+    vision: typeof course.vision === "string" ? course.vision : "",
+    mission: Array.isArray(course.mission) ? course.mission : [],
+    contract: course.contract && course.contract.name ? course.contract : null,
     active: Number(course.active) || 0,
     progress: Number(course.progress) || 0,
   };
@@ -113,26 +117,16 @@ export function nextOccurrence(course, now = new Date()) {
  * @returns {{error: string} | {course: object}}
  */
 export function buildCourseFromForm(form, existing) {
-  const name = form.name.trim();
-  const lecturer = form.lecturer.trim();
-  const room = form.room.trim();
-  const code = form.code.trim().toUpperCase();
-  const sks = Number(form.sks);
-  const tm = form.time.trim().match(TIME_RE);
-  if (name.length < 3) return { error: "Nama mata kuliah minimal 3 karakter." };
-  if (code && !/^[A-Z0-9-]{2,10}$/.test(code)) return { error: "Kode hanya huruf/angka (2-10 karakter), contoh: CS405." };
-  if (lecturer.length < 3) return { error: "Nama dosen pengampu wajib diisi." };
-  if (!DAYS.slice(1, 7).includes(form.day) || ![1, 2, 3, 4].includes(sks)) return { error: "Hari atau SKS tidak valid." };
-  if (!tm || +tm[1] > 23 || +tm[3] > 23 || +tm[2] > 59 || +tm[4] > 59) return { error: "Format waktu: 08:00 - 10:30 (opsional WITA)." };
-  if (existing.some((c) => c.name.toLowerCase() === name.toLowerCase())) return { error: "Mata kuliah ini sudah ada." };
-  const p2 = (n) => String(n).padStart(2, "0");
+  const error = validateCourseForm(form, existing);
+  if (error) return { error };
+  const f = normalizeFormFields(form);
   return {
     course: {
-      id: String(Date.now()), name,
-      code: code || "MK" + String(existing.length + 1).padStart(3, "0"),
-      sks, desc: "", lecturer, img: "", day: form.day,
-      time: `${p2(+tm[1])}:${tm[2]} - ${p2(+tm[3])}:${tm[4]}`,
-      room, active: 0, progress: 0, accent: ACCENTS[existing.length % ACCENTS.length],
+      id: String(Date.now()), name: f.name,
+      code: f.code || "MK" + String(existing.length + 1).padStart(3, "0"),
+      sks: f.sks, desc: f.desc, vision: f.vision, mission: f.mission, contract: null,
+      lecturer: f.lecturer, img: "", day: f.day, time: f.time,
+      room: f.room, active: 0, progress: 0, accent: ACCENTS[existing.length % ACCENTS.length],
       semesterStatus: "current", resultStatus: "",
     },
   };

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AddCourseModal from "../components/courses/AddCourseModal.jsx";
 import CourseCard from "../components/courses/CourseCard.jsx";
+import CourseDetailModal from "../components/courses/CourseDetailModal.jsx";
 import { useCourses } from "../hooks/useCourses.js";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { DAYS, nextOccurrence, withTaskMetrics } from "../services/courseService.js";
@@ -35,7 +36,7 @@ export default function CoursesPage() {
     bodyClass: "bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen",
   });
 
-  const { courses, addCourse, removeCourse, setSemesterStatus } = useCourses();
+  const { courses, addCourse, updateCourse, removeCourse, setSemesterStatus, setContract } = useCourses();
   const [tasks] = useState(loadTasks);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("schedule");
@@ -43,6 +44,8 @@ export default function CoursesPage() {
   const [semesterFilter, setSemesterFilter] = useState("current");
   const [menuId, setMenuId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [detailId, setDetailId] = useState(null);
+  const [editing, setEditing] = useState(null); // { id, fromDetail }
 
   // Klik di luar menu aksi menutup menu.
   useEffect(() => {
@@ -87,6 +90,16 @@ export default function CoursesPage() {
   const handleSubmit = (form) => {
     const message = addCourse(form);
     if (!message) setModalOpen(false);
+    return message;
+  };
+  const editingCourse = editing ? courses.find((c) => String(c.id) === String(editing.id)) : null;
+  const detailCourse = detailId ? courses.find((c) => String(c.id) === String(detailId)) : null;
+  const handleEditSubmit = (form) => {
+    const message = updateCourse(editing.id, form);
+    if (!message) {
+      if (editing.fromDetail) setDetailId(editing.id);
+      setEditing(null);
+    }
     return message;
   };
   const handleDelete = (id) => {
@@ -194,6 +207,8 @@ export default function CoursesPage() {
                   key={course.id} course={course}
                   menuOpen={menuId === course.id}
                   onToggleMenu={() => setMenuId((id) => (id === course.id ? null : course.id))}
+                  onView={() => { setMenuId(null); setDetailId(course.id); }}
+                  onEdit={() => { setMenuId(null); setEditing({ id: course.id, fromDetail: false }); }}
                   onDelete={() => handleDelete(course.id)}
                   onStatusChange={(status) => setSemesterStatus(course.id, status)}
                 />
@@ -273,6 +288,15 @@ export default function CoursesPage() {
           </div>
         </div>
         {modalOpen && <AddCourseModal onClose={() => setModalOpen(false)} onSubmit={handleSubmit} />}
+        {editingCourse && <AddCourseModal initial={editingCourse} onClose={() => { if (editing.fromDetail) setDetailId(editing.id); setEditing(null); }} onSubmit={handleEditSubmit} />}
+        {detailCourse && !editingCourse && (
+          <CourseDetailModal
+            course={detailCourse} tasks={tasks} courses={courses}
+            onClose={() => setDetailId(null)}
+            onEdit={() => { setEditing({ id: detailCourse.id, fromDetail: true }); setDetailId(null); }}
+            onContractChange={(contract) => setContract(detailCourse.id, contract)}
+          />
+        )}
       </div>
     </main>
   );

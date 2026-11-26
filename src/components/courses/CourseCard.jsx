@@ -71,7 +71,7 @@ function TaskSummary({ course }) {
 }
 
 /** Kartu mata kuliah. `course` sudah memuat metrik tugas (active, progress). */
-export default function CourseCard({ course, menuOpen, onToggleMenu, onDelete, onStatusChange }) {
+export default function CourseCard({ course, menuOpen, onToggleMenu, onView, onEdit, onDelete, onStatusChange }) {
   const selectId = `gd-semester-status-${course.id}`;
   return (
     <div className="course-card group relative bg-surface-clean rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col justify-between" data-id={course.id}>
@@ -92,10 +92,10 @@ export default function CourseCard({ course, menuOpen, onToggleMenu, onDelete, o
             </button>
             {menuOpen && (
               <div className="action-dropdown absolute right-0 top-9 w-44 bg-surface-clean rounded-xl shadow-lg p-1.5 z-20" onClick={(e) => e.stopPropagation()}>
-                <a className="flex items-center gap-2 px-space-sm py-2 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container transition-colors" href="#" onClick={(e) => e.preventDefault()}>
+                <button className="w-full flex items-center gap-2 px-space-sm py-2 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container transition-colors" type="button" onClick={onView}>
                   <span className="material-symbols-outlined text-[16px]">visibility</span><span>Lihat Detail</span>
-                </a>
-                <button className="w-full flex items-center gap-2 px-space-sm py-2 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container transition-colors" type="button">
+                </button>
+                <button className="w-full flex items-center gap-2 px-space-sm py-2 rounded-lg text-body-sm font-body-sm text-on-surface hover:bg-surface-container transition-colors" type="button" onClick={onEdit}>
                   <span className="material-symbols-outlined text-[16px]">edit</span><span>Edit Mata Kuliah</span>
                 </button>
                 <div className="h-[1px] bg-border-subtle my-1"></div>

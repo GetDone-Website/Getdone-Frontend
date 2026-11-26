@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import ActivityChart from "../components/analytics/ActivityChart.jsx";
 import PomodoroTimer from "../components/analytics/PomodoroTimer.jsx";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { loadTasks } from "../services/taskService.js";
@@ -58,10 +59,6 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
           <div className="lg:col-span-5 flex flex-col gap-space-lg">
             <PomodoroTimer initialTaskId={searchParams.get("task") || ""} />
-            <div className="bg-surface-clean rounded-xl p-space-md shadow-sm flex items-center gap-space-md">
-              <span className="material-symbols-outlined text-primary text-[28px]">tips_and_updates</span>
-              <div><h3 className="font-label-md text-label-md text-on-surface font-semibold">Tips Produktivitas</h3><p className="font-body-sm text-body-sm text-text-muted">Pilih satu tugas penting, fokus selama satu sesi, lalu ambil istirahat singkat.</p></div>
-            </div>
           </div>
           <div className="lg:col-span-7 flex flex-col gap-space-lg">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
@@ -75,23 +72,30 @@ export default function AnalyticsPage() {
                 <div className="font-body-sm text-body-sm text-text-muted mt-space-xs">{stat.subtitle}</div>
               </div>)}
             </div>
-            <section className="bg-surface-clean rounded-xl shadow-sm p-space-lg">
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Beban Tugas per Mata Kuliah</h2>
-              <p className="font-body-sm text-body-sm text-text-muted mt-1">Jumlah tugas dari database untuk setiap mata kuliah.</p>
-              <div className="flex flex-col gap-space-md mt-space-lg">
-                {metrics.workload.length ? metrics.workload.map((c) => <div key={c.name}>
-                  <div className="flex justify-between gap-4 text-on-surface font-label-md text-label-md mb-2"><span className="truncate">{c.name}</span><span className="font-semibold">{c.count} tugas</span></div>
-                  <div className="w-full h-2 bg-surface-muted rounded-full overflow-hidden"><div className="h-full bg-primary-container rounded-full" style={{ width: `${Math.round(c.count / metrics.maxCount * 100)}%` }} /></div>
-                </div>) : <div className="text-text-muted font-body-sm py-6">Belum ada tugas untuk dianalisis.</div>}
-              </div>
-            </section>
-            <section className="bg-surface-clean rounded-xl shadow-sm p-space-lg">
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Sesi Fokus Terbaru</h2>
-              {sessions.length ? [...sessions].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).slice(0, 5).map((s) =>
-                <div key={s.id} className="flex justify-between gap-3 border-b border-border-subtle py-3 text-on-surface font-body-sm"><span>{s.taskTitle || "Sesi fokus mandiri"}</span><span className="text-text-muted whitespace-nowrap">{s.durationMinutes} menit · {new Date(s.completedAt).toLocaleDateString("id-ID")}</span></div>
-              ) : <p className="font-body-sm text-body-sm text-text-muted mt-4">Belum ada sesi fokus tercatat.</p>}
-            </section>
+            <div className="bg-surface-clean rounded-xl p-space-md shadow-sm flex items-center gap-space-md">
+              <span className="material-symbols-outlined text-primary text-[28px]">tips_and_updates</span>
+              <div><h3 className="font-label-md text-label-md text-on-surface font-semibold">Tips Produktivitas</h3><p className="font-body-sm text-body-sm text-text-muted">Pilih satu tugas penting, fokus selama satu sesi, lalu ambil istirahat singkat.</p></div>
+            </div>
           </div>
+        </div>
+        <ActivityChart sessions={sessions} tasks={tasks} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter items-start">
+          <section className="bg-surface-clean rounded-xl shadow-sm p-space-lg">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Beban Tugas per Mata Kuliah</h2>
+            <p className="font-body-sm text-body-sm text-text-muted mt-1">Jumlah tugas dari database untuk setiap mata kuliah.</p>
+            <div className="flex flex-col gap-space-md mt-space-lg">
+              {metrics.workload.length ? metrics.workload.map((c) => <div key={c.name}>
+                <div className="flex justify-between gap-4 text-on-surface font-label-md text-label-md mb-2"><span className="truncate">{c.name}</span><span className="font-semibold">{c.count} tugas</span></div>
+                <div className="w-full h-2 bg-surface-muted rounded-full overflow-hidden"><div className="h-full bg-primary-container rounded-full" style={{ width: `${Math.round(c.count / metrics.maxCount * 100)}%` }} /></div>
+              </div>) : <div className="text-text-muted font-body-sm py-6">Belum ada tugas untuk dianalisis.</div>}
+            </div>
+          </section>
+          <section className="bg-surface-clean rounded-xl shadow-sm p-space-lg">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">Sesi Fokus Terbaru</h2>
+            {sessions.length ? [...sessions].sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt)).slice(0, 5).map((s) =>
+              <div key={s.id} className="flex justify-between gap-3 border-b border-border-subtle py-3 text-on-surface font-body-sm"><span>{s.taskTitle || "Sesi fokus mandiri"}</span><span className="text-text-muted whitespace-nowrap">{s.durationMinutes} menit · {new Date(s.completedAt).toLocaleDateString("id-ID")}</span></div>
+            ) : <p className="font-body-sm text-body-sm text-text-muted mt-4">Belum ada sesi fokus tercatat.</p>}
+          </section>
         </div>
       </div>
     </main>
