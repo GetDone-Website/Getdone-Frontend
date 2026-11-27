@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import ThemeToggle from "../components/common/ThemeToggle.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 
@@ -61,14 +62,17 @@ export default function RegisterPage() {
     <>
           <main className="w-full bg-background min-h-screen">
             <div className="flex flex-col w-full">
-              <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16 flex items-center justify-center min-h-[calc(100vh-2rem)]">
+              <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8 lg:py-16 flex items-center justify-center min-h-[calc(100vh-2rem)]">
                 <div className="absolute top-4 left-4 sm:left-6 lg:left-8 z-10">
                   <Link className="inline-flex items-center gap-1.5 text-body-sm font-label-md text-text-muted hover:text-on-surface transition-colors py-1.5 px-3 rounded-lg hover:bg-surface-container" to="/"><span className="material-symbols-outlined text-lg">arrow_back</span><span className="">Kembali ke Beranda</span></Link>
+                </div>
+                <div className="absolute top-4 right-4 sm:right-6 lg:right-8 z-10">
+                  <ThemeToggle />
                 </div>
                 <div className="absolute -top-12 -left-12 w-96 h-96 bg-primary-fixed-dim/20 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="absolute -bottom-16 -right-12 w-80 h-80 bg-state-progress/15 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="relative w-full grid grid-cols-1 lg:grid-cols-12 rounded-xl overflow-hidden shadow-xl bg-surface-clean">
-                  <div className="lg:col-span-5 bg-surface-container p-8 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+                  <div className="lg:col-span-5 bg-surface-container p-6 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden">
                     <div className="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-primary">
                       <span className="material-symbols-outlined text-[280px]">school</span>
                     </div>

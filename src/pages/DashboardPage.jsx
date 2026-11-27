@@ -4,6 +4,7 @@ import TaskRow from "../components/dashboard/TaskRow.jsx";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { courseLabel } from "../services/academicData.js";
 import { loadCourses } from "../services/courseService.js";
+import { loadPreferences } from "../services/preferencesService.js";
 import { loadTasks, saveTasks, formatDeadline } from "../services/taskService.js";
 
 const badgeBase = "px-2 py-0.5 rounded-md font-label-sm text-label-sm font-semibold";
@@ -24,24 +25,28 @@ export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState(newDraft);
   const [notice, setNotice] = useState("");
+  const [urgentHours, setUrgentHours] = useState(() => loadPreferences().urgentThresholdHours);
 
   useEffect(() => {
     const refreshTasks = () => setTasks(loadTasks());
     const refreshCourses = () => setCourses(loadCourses());
+    const refreshPrefs = () => setUrgentHours(loadPreferences().urgentThresholdHours);
     window.addEventListener("getdone:tasks-changed", refreshTasks);
     window.addEventListener("getdone:courses-changed", refreshCourses);
+    window.addEventListener("getdone:preferences-changed", refreshPrefs);
     return () => {
       window.removeEventListener("getdone:tasks-changed", refreshTasks);
       window.removeEventListener("getdone:courses-changed", refreshCourses);
+      window.removeEventListener("getdone:preferences-changed", refreshPrefs);
     };
   }, []);
 
   const counts = useMemo(() => {
     const completed = tasks.filter((t) => t.status === "done").length;
-    const urgent = tasks.filter((t) => t.status !== "done" && new Date(t.deadline) <= Date.now() + 86400000).length;
+    const urgent = tasks.filter((t) => t.status !== "done" && new Date(t.deadline) <= Date.now() + urgentHours * 3600000).length;
     return { total: tasks.length, active: tasks.length - completed, completed, urgent,
       rate: tasks.length ? Math.round(completed / tasks.length * 100) : 0 };
-  }, [tasks]);
+  }, [tasks, urgentHours]);
 
   const visibleTasks = useMemo(() => tasks
     .filter((t) => [t.title, t.desc, t.priority, courseLabel(t.course, courses)].join(" ").toLowerCase().includes(query.toLowerCase().trim()))
@@ -86,7 +91,7 @@ export default function DashboardPage() {
               <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight">Ringkasan Belajar &amp; Agenda Harian</h1>
               <p className="font-body-sm text-body-sm text-text-muted max-w-xl">Status dan tugas pada halaman ini bersumber dari data akun Anda, bukan data demo.</p>
             </div>
-            <div className="flex gap-space-sm">
+            <div className="flex flex-wrap gap-space-sm">
               <button type="button" onClick={() => setModalOpen(true)} className="bg-primary-container text-on-primary rounded-xl px-space-md py-space-sm font-label-lg font-semibold hover:bg-cta-hover flex items-center gap-space-xs">
                 <span className="material-symbols-outlined">add</span>Tambah Tugas
               </button>
@@ -99,7 +104,7 @@ export default function DashboardPage() {
           {[
             { label: "Tugas Berjalan", value: counts.active, meta: `${counts.total} tugas terdaftar`, icon: "assignment", color: "text-primary" },
             { label: "Tugas Selesai", value: counts.completed, meta: `${counts.rate}% dari seluruh tugas`, icon: "check_circle", color: "text-state-done" },
-            { label: "Tenggat ≤ 24 Jam", value: counts.urgent, meta: "Belum diselesaikan", icon: "alarm_on", color: "text-state-urgent" },
+            { label: `Tenggat ≤ ${urgentHours} Jam`, value: counts.urgent, meta: "Belum diselesaikan", icon: "alarm_on", color: "text-state-urgent" },
           ].map((stat) => (
             <div key={stat.label} className="bg-surface-clean rounded-xl p-space-lg shadow-sm">
               <div className="flex justify-between items-start gap-3">
@@ -118,7 +123,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-8 flex flex-col gap-space-md">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div><h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">Prioritas Tugas</h2><p className="font-body-sm text-body-sm text-text-muted">Urutan berdasarkan tenggat terdekat</p></div>
-              <div className="flex gap-2 items-center"><input aria-label="Cari tugas" placeholder="Cari tugas..." value={query} onChange={(e) => setQuery(e.target.value)} className="bg-surface-clean rounded-lg p-2 shadow-sm text-on-surface"/><Link to="/tasks" className="font-label-sm text-primary underline">Semua Tugas</Link></div>
+              <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto"><input aria-label="Cari tugas" placeholder="Cari tugas..." value={query} onChange={(e) => setQuery(e.target.value)} className="min-w-0 flex-1 sm:flex-initial bg-surface-clean rounded-lg p-2 shadow-sm text-on-surface"/><Link to="/tasks" className="font-label-sm text-primary underline whitespace-nowrap">Semua Tugas</Link></div>
             </div>
             <div className="flex flex-col gap-space-sm">
               {visibleTasks.length ? visibleTasks.map((t) => <TaskRow key={t.id} task={t} onToggle={toggleTask} />) : <div className="rounded-xl bg-surface-clean p-space-lg text-text-muted">Belum ada tugas. Tambahkan tugas pertama melalui tombol di atas.</div>}

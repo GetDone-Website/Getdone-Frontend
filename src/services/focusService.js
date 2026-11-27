@@ -25,7 +25,11 @@ export function loadFocusSettings() {
 export const loadSettingsHidden = () => readFlag(STORAGE_KEYS.focusSettingsHidden, false);
 export const saveSettingsHidden = (hidden) => writeFlag(STORAGE_KEYS.focusSettingsHidden, hidden);
 
-export const saveFocusSettings = (settings) => writeJSON(STORAGE_KEYS.focusSettings, settings);
+export const saveFocusSettings = (settings) => {
+  const ok = writeJSON(STORAGE_KEYS.focusSettings, settings);
+  window.dispatchEvent(new CustomEvent("getdone:focus-settings-changed", { detail: settings }));
+  return ok;
+};
 
 export function logFocusSession({ taskId, taskTitle, durationMinutes }) {
   const log = readJSON(STORAGE_KEYS.focusSessions, []);

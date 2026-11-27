@@ -4,8 +4,18 @@ import { ROUTES, STORAGE_KEYS } from "../utils/constants.js";
 
 export const ThemeContext = createContext(null);
 
-// Dark mode diterapkan di area aplikasi serta halaman landing page.
-const THEMED_PATHS = [ROUTES.home, ROUTES.onboarding, ROUTES.dashboard, ROUTES.courses, ROUTES.tasks, ROUTES.analytics, ROUTES.profile];
+// Dark mode diterapkan di area aplikasi, landing page, serta halaman login/register.
+const THEMED_PATHS = [
+  ROUTES.home,
+  ROUTES.login,
+  ROUTES.register,
+  ROUTES.onboarding,
+  ROUTES.dashboard,
+  ROUTES.courses,
+  ROUTES.tasks,
+  ROUTES.analytics,
+  ROUTES.profile,
+];
 
 function readStoredTheme() {
   try {

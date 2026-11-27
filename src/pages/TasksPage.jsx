@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import TaskCard from "../components/tasks/TaskCard.jsx";
 import TaskTable from "../components/tasks/TaskTable.jsx";
@@ -6,6 +6,7 @@ import { CreateTaskModal, EditTaskModal } from "../components/tasks/TaskModals.j
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { useTasks } from "../hooks/useTasks.js";
 import { courseLabel, getCourses, resolveCourseId, taskMatchesCourse } from "../services/academicData.js";
+import { loadPreferences } from "../services/preferencesService.js";
 import { STATUS } from "../services/taskService.js";
 import { API_ENABLED } from "../services/api.js";
 import { loadCourses } from "../services/courseService.js";
@@ -41,7 +42,16 @@ function mergeOptions(base, courses) {
   return [...base, ...extra];
 }
 
-const byDeadline = (a, b) => new Date(a.deadline) - new Date(b.deadline); // paling mendesak di atas
+const PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+const makeComparator = (sortBy) => (a, b) => {
+  if (sortBy === "priority") {
+    return (PRIORITY_RANK[a.priority] ?? 1) - (PRIORITY_RANK[b.priority] ?? 1) || new Date(a.deadline) - new Date(b.deadline);
+  }
+  if (sortBy === "newest") {
+    return String(b.id).localeCompare(String(a.id));
+  }
+  return new Date(a.deadline) - new Date(b.deadline);
+};
 
 export default function TasksPage() {
   usePageMeta({
@@ -67,10 +77,17 @@ export default function TasksPage() {
     return options;
   }, [academicCourses, requestedId, requestedCourse]);
 
+  const [prefs, setPrefs] = useState(() => loadPreferences());
+  useEffect(() => {
+    const onPrefs = () => setPrefs(loadPreferences());
+    window.addEventListener("getdone:preferences-changed", onPrefs);
+    return () => window.removeEventListener("getdone:preferences-changed", onPrefs);
+  }, []);
+
   const [query, setQuery] = useState("");
   const [courseFilter, setCourseFilter] = useState(requestedId);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [view, setView] = useState("kanban");
+  const [view, setView] = useState(() => loadPreferences().tasksDefaultView);
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -79,6 +96,7 @@ export default function TasksPage() {
 
   const { filtered, groups } = useMemo(() => {
     const q = query.toLowerCase().trim();
+    const sortFn = makeComparator(prefs.tasksDefaultSort);
     const list = tasks.filter(
       (t) =>
         (!q || t.title.toLowerCase().includes(q) || courseLabel(t.course, academicCourses).toLowerCase().includes(q)) &&
@@ -87,14 +105,14 @@ export default function TasksPage() {
     );
     const g = { todo: [], in_progress: [], done: [] };
     list.forEach((t) => (g[t.status] || g.todo).push(t));
-    g.todo.sort(byDeadline);
-    g.in_progress.sort(byDeadline);
+    g.todo.sort(sortFn);
+    g.in_progress.sort(sortFn);
     g.done.sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
-    return { filtered: [...list].sort(byDeadline), groups: g };
-  }, [tasks, query, courseFilter, statusFilter, academicCourses]);
+    return { filtered: [...list].sort(sortFn), groups: g };
+  }, [tasks, query, courseFilter, statusFilter, academicCourses, prefs.tasksDefaultSort]);
 
   const handleDelete = (id) => {
-    if (window.confirm("Hapus tugas ini?")) removeTask(id);
+    if (!prefs.confirmDeleteTask || window.confirm("Hapus tugas ini?")) removeTask(id);
   };
   const handleStatus = (id, status) => STATUS[status] && updateTask(id, { status });
   const handleCreate = (task) => {
@@ -144,14 +162,14 @@ export default function TasksPage() {
               />
             </div>
             <div className="flex flex-wrap items-center gap-space-sm">
-              <div className="relative min-w-[170px]">
+              <div className="relative flex-1 sm:flex-initial min-w-[140px]">
                 <select className={SELECT} id="filter-matkul" aria-label="Filter mata kuliah" value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)}>
                   <option value="all">Semua Mata Kuliah</option>
                   {filterOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
                 <span className="material-symbols-outlined absolute right-space-sm top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[18px]">expand_more</span>
               </div>
-              <div className="relative min-w-[150px]">
+              <div className="relative flex-1 sm:flex-initial min-w-[140px]">
                 <select className={SELECT} id="filter-status" aria-label="Filter status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                   <option value="all">Semua Status</option>
                   <option value="todo">To Do</option>
@@ -195,7 +213,7 @@ export default function TasksPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex flex-col gap-space-md min-h-[400px]" id={col.cardsId}>
+                <div className="flex flex-col gap-space-md min-h-[160px] lg:min-h-[400px]" id={col.cardsId}>
                   {groups[col.key].length === 0 ? (
                     <p className="text-center text-text-muted font-body-sm text-body-sm py-space-lg">Belum ada tugas</p>
                   ) : (

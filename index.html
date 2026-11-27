@@ -8,7 +8,7 @@
       // Terapkan tema gelap sebelum React dirender agar tidak berkedip (hanya di area aplikasi).
       (function () {
         try {
-          var app = location.pathname === "/" || /^\/(onboarding|dashboard|courses|tasks|analytics|profile)(\/|$)/.test(location.pathname);
+          var app = location.pathname === "/" || /^\/(login|register|onboarding|dashboard|courses|tasks|analytics|profile)(\/|$)/.test(location.pathname);
           var saved = localStorage.getItem("getdoneTheme");
           var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
           if (app && dark) document.documentElement.classList.add("dark");

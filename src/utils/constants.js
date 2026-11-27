@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   tasks: "getdone_tasks_v1",
   focusSettings: "getdoneFocusSettings",
   focusSettingsHidden: "getdoneFocusSettingsHidden",
+  preferences: "getdonePreferences",
   theme: "getdoneTheme",
   token: "getdoneToken",
   focusSessions: "getdoneFocusSessions",

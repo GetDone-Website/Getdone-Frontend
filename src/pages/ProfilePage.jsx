@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import ProfileSettingsPanel from "../components/profile/ProfileSettingsPanel.jsx";
 import { useAuth } from "../hooks/useAuth.js";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { changeEmail, loadProfile, saveProfile, uploadProfileAvatar } from "../services/userService.js";
@@ -410,6 +411,8 @@ export default function ProfilePage() {
             )}
           </div>
         </section>
+
+        <ProfileSettingsPanel />
       </div>
     </main>
   );

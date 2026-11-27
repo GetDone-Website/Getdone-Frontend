@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavAuthActions from "../components/common/NavAuthActions.jsx";
 import ThemeToggle from "../components/common/ThemeToggle.jsx";
@@ -8,23 +9,74 @@ export default function LandingPage() {
     title: "GetDone — Kelola Tugas Kuliah | GetDone",
     bodyClass: "bg-surface font-body-md text-on-surface antialiased selection:bg-primary-fixed selection:text-on-primary-fixed",
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const targets = document.querySelectorAll(".lp-reveal");
+    if (!targets.length) return undefined;
+    if (!("IntersectionObserver" in window)) {
+      targets.forEach((el) => el.classList.add("is-visible"));
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+    );
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
           <header className="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
             <div className="h-20 max-w-7xl mx-auto px-margin flex items-center justify-between gap-gutter">
-              <div className="flex items-center gap-space-xl">
-                <a className="flex items-center gap-space-xs" data-path="landing-page" href="#hero-section"><span className="material-symbols-outlined text-primary text-3xl">task_alt</span><span className="font-headline-md text-headline-md font-bold tracking-tight text-primary">GetDone</span></a>
+              <div className="flex items-center gap-space-xl min-w-0">
+                <a className="flex items-center gap-space-xs flex-shrink-0" data-path="landing-page" href="#hero-section"><span className="material-symbols-outlined text-primary text-3xl">task_alt</span><span className="font-headline-md text-headline-md font-bold tracking-tight text-primary">GetDone</span></a>
                 <nav className="hidden lg:flex items-center gap-space-lg" data-active-classes="text-primary font-semibold">
                   <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors duration-150" data-path="modul-akademik" href="#modul-akademik">Modul Akademik</a>
                   <a className="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors duration-150" data-path="fitur-unggulan" href="#fitur-unggulan">Fitur Unggulan</a><a className="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors duration-150" data-path="alur-kerja" href="#alur-kerja">Alur Kerja</a><a className="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors duration-150" data-path="testimoni" href="#testimoni">Testimoni</a>
                 </nav>
               </div>
-              <div className="flex items-center gap-space-md">
+              <div className="flex items-center gap-space-md flex-shrink-0">
                 <ThemeToggle />
                 <NavAuthActions />
+                <button
+                  type="button"
+                  className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                  aria-label={mobileMenuOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+                  aria-expanded={mobileMenuOpen}
+                  onClick={() => setMobileMenuOpen((v) => !v)}
+                >
+                  <span className="material-symbols-outlined text-[22px]">{mobileMenuOpen ? "close" : "menu"}</span>
+                </button>
               </div>
             </div>
+            {mobileMenuOpen && (
+              <nav className="lg:hidden border-t border-border-subtle bg-surface/95 backdrop-blur-xl px-4 py-3 flex flex-col gap-1 shadow-md" aria-label="Navigasi mobile">
+                {[
+                  { href: "#modul-akademik", label: "Modul Akademik" },
+                  { href: "#fitur-unggulan", label: "Fitur Unggulan" },
+                  { href: "#alur-kerja", label: "Alur Kerja" },
+                  { href: "#testimoni", label: "Testimoni" },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-3 py-2.5 rounded-xl font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+            )}
           </header>
           <main className="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]">
             <div className="flex flex-col w-full">
@@ -34,7 +86,7 @@ export default function LandingPage() {
               </div>
               {/* Hero Section */}
               <section id="hero-section" className="lp-hero w-full max-w-7xl mx-auto px-margin">
-                <div className="lp-hero-inner flex flex-col items-center text-center">
+                <div className="lp-hero-inner lp-reveal flex flex-col items-center text-center">
                   {/* Tagline / Overline Badge */}
                   <div className="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-highest shadow-sm">
                     <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
@@ -86,11 +138,11 @@ export default function LandingPage() {
               </section>
               {/* Editorial Section: Values & Visual Atmosphere */}
               <section id="modul-akademik" className="lp-section w-full max-w-7xl mx-auto px-margin">
-                <div className="bg-surface-container rounded-3xl lp-panel shadow-sm">
+                <div className="bg-surface-container rounded-3xl lp-panel shadow-sm lp-reveal">
                   <div className="grid grid-cols-1 lg:grid-cols-12 lp-split items-center">
                     {/* Visual Mood Collage (5 cols) */}
                     <div className="lg:col-span-5 relative">
-                      <div className="relative w-full h-[380px] rounded-2xl overflow-hidden shadow-lg">
+                      <div className="relative w-full h-[240px] sm:h-[320px] lg:h-[380px] rounded-2xl overflow-hidden shadow-lg">
                         <img className="w-full h-full object-cover" data-alt="A focused Southeast Asian college student studying peacefully in a bright minimalist sunlit library desk with architectural parchment notebooks, a laptop showing academic clean charts, a ceramic mug, warm ambient morning light, tranquil teal stationery, aesthetic high-contrast academic focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbleocCGXlk0ewKjrMtrpBfdRx32mod-z81NHEuMvkV1dy-OPM_Rs9AAIZaZVIOIskr7bbGK-txGzvVK9jOJG4qIIXVNnzfZzOoq5ro7aojfKs-mNgitShCa7QyVxJHz8ptLX6mlDimdSpFnl-PwczqDje1KJqEY55FtFmZzsscexjK0qi74i7gfP_TDCVcig1zSLYPHfAFQFFTitGCYyPjEKfLyIBAfZ4t-prO3SII4wQ3Kma038OpA" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
                         <div className="absolute bottom-4 left-4 right-4 text-white">
@@ -146,7 +198,7 @@ export default function LandingPage() {
               </section>
               {/* 3 Nilai Manfaat Utama Section */}
               <section className="lp-section w-full max-w-7xl mx-auto px-margin" id="fitur-unggulan">
-                <div className="text-center max-w-2xl mx-auto lp-head">
+                <div className="text-center max-w-2xl mx-auto lp-head lp-reveal">
                   <span className="font-label-sm text-label-sm font-semibold uppercase tracking-widest text-primary">Kapasitas Maksimal Tanpa Burnout</span>
                   <h2 className="font-display-lg text-headline-lg md:text-display-lg font-bold text-on-surface mt-space-xs">
                     Tiga Pilar Kendali Akademik GetDone
@@ -159,7 +211,7 @@ export default function LandingPage() {
                 {/* 3 Benefit Cards Bento Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lp-grid">
                   {/* Manfaat 1: Pengingat Tenggat Presisi */}
-                  <div className="bg-surface-clean rounded-2xl lp-card shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col justify-between group">
+                  <div className="bg-surface-clean rounded-2xl lp-card lp-reveal lp-reveal-delay-1 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div className="flex flex-col gap-space-sm">
                       <div className="w-14 h-14 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                         <span className="material-symbols-outlined text-3xl">notifications_active</span>
@@ -193,7 +245,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   {/* Manfaat 2: Sesi Fokus Pomodoro */}
-                  <div className="bg-surface-clean rounded-2xl lp-card shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col justify-between group">
+                  <div className="bg-surface-clean rounded-2xl lp-card lp-reveal lp-reveal-delay-1 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div className="flex flex-col gap-space-sm">
                       <div className="w-14 h-14 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                         <span className="material-symbols-outlined text-3xl">timer</span>
@@ -227,7 +279,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   {/* Manfaat 3: Hub Mata Kuliah Terintegrasi */}
-                  <div className="bg-surface-clean rounded-2xl lp-card shadow-sm hover:shadow-xl transition-all duration-200 flex flex-col justify-between group">
+                  <div className="bg-surface-clean rounded-2xl lp-card lp-reveal lp-reveal-delay-1 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between group">
                     <div className="flex flex-col gap-space-sm">
                       <div className="w-14 h-14 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
                         <span className="material-symbols-outlined text-3xl">auto_stories</span>
@@ -264,7 +316,7 @@ export default function LandingPage() {
               </section>
               {/* Alur Kerja Sederhana Section */}
               <section id="alur-kerja" className="lp-section w-full max-w-7xl mx-auto px-margin">
-                <div className="bg-surface-clean rounded-3xl lp-panel shadow-sm">
+                <div className="bg-surface-clean rounded-3xl lp-panel shadow-sm lp-reveal">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-sm lp-head">
                     <div>
                       <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Langkah Mudah Memulai</span>
@@ -346,7 +398,7 @@ export default function LandingPage() {
               </section>
               {/* Kutipan Pengalaman Pengguna (Testimoni) Section */}
               <section id="testimoni" className="lp-section w-full max-w-7xl mx-auto px-margin">
-                <div className="text-center max-w-xl mx-auto lp-head">
+                <div className="text-center max-w-xl mx-auto lp-head lp-reveal">
                   <span className="font-label-sm text-label-sm uppercase tracking-widest text-primary font-semibold">Pengalaman Nyata</span>
                   <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface mt-1">
                     Ritme Belajar Lebih Tenang dan Teratur
@@ -355,7 +407,7 @@ export default function LandingPage() {
                 {/* Editorial Testimonials Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 lp-grid">
                   {/* Testimonial 1 */}
-                  <div className="bg-surface-clean rounded-2xl lp-card shadow-sm flex flex-col justify-between">
+                  <div className="bg-surface-clean rounded-2xl lp-card lp-reveal shadow-sm flex flex-col justify-between">
                     <div className="flex flex-col gap-space-sm">
                       <div className="flex items-center text-primary-container">
                         <span className="material-symbols-outlined" style={{"fontVariationSettings": "'FILL' 1"}}>star</span>
@@ -386,7 +438,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   {/* Testimonial 2 (Featured) */}
-                  <div className="bg-surface-container rounded-2xl lp-card shadow-md flex flex-col justify-between relative overflow-hidden">
+                  <div className="bg-surface-container rounded-2xl lp-card lp-reveal lp-reveal-delay-1 shadow-md flex flex-col justify-between relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary-fixed/30 rounded-bl-full pointer-events-none"></div>
                     <div className="flex flex-col gap-space-sm relative">
                       <div className="flex items-center text-primary-container">
@@ -418,7 +470,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   {/* Testimonial 3 */}
-                  <div className="bg-surface-clean rounded-2xl lp-card shadow-sm flex flex-col justify-between">
+                  <div className="bg-surface-clean rounded-2xl lp-card lp-reveal shadow-sm flex flex-col justify-between">
                     <div className="flex flex-col gap-space-sm">
                       <div className="flex items-center text-primary-container">
                         <span className="material-symbols-outlined" style={{"fontVariationSettings": "'FILL' 1"}}>star</span>
@@ -451,7 +503,7 @@ export default function LandingPage() {
               </section>
               {/* Banner Ajakan Bertindak (Call to Action) */}
               <section className="lp-section w-full max-w-7xl mx-auto px-margin">
-                <div className="bg-inverse-surface dark:bg-surface-container-high text-surface-clean dark:text-on-surface rounded-3xl lp-panel shadow-2xl relative overflow-hidden">
+                <div className="bg-inverse-surface dark:bg-surface-container-high text-surface-clean dark:text-on-surface rounded-3xl lp-panel lp-reveal shadow-2xl relative overflow-hidden">
                   {/* Subtle Decorative Radial Glow inside banner */}
                   <div className="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-primary-container/30 blur-3xl pointer-events-none"></div>
                   <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-space-lg">

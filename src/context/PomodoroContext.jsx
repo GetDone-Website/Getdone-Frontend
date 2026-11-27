@@ -12,6 +12,8 @@ import {
   saveFocusSettings,
   saveSettingsHidden,
 } from "../services/focusService.js";
+import { loadPreferences } from "../services/preferencesService.js";
+import { playAlarm, sendPomodoroNotification, stopAlarm } from "../services/alarmSound.js";
 import { loadTasks } from "../services/taskService.js";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -85,6 +87,12 @@ export function PomodoroProvider({ children }) {
     text: "Timer menggunakan pengaturan yang tersimpan di browser ini.",
     warn: false,
   });
+  const [alarmToast, setAlarmToast] = useState(null); // { id, title, body }
+
+  const dismissAlarmToast = useCallback(() => {
+    stopAlarm();
+    setAlarmToast(null);
+  }, []);
 
   // ── Task ──
   const [tasks] = useState(loadTasks);
@@ -147,6 +155,9 @@ export function PomodoroProvider({ children }) {
       if (document.documentElement.classList.contains("dark")) {
         win.document.documentElement.classList.add("dark");
       }
+      if (document.documentElement.style.fontSize) {
+        win.document.documentElement.style.fontSize = document.documentElement.style.fontSize;
+      }
       win.document.title = "Pomodoro Mini | GetDone";
       win.document.body.style.margin = "0";
       win.document.body.style.overflow = "hidden";
@@ -161,6 +172,28 @@ export function PomodoroProvider({ children }) {
     }
   }, [isPipSupported, pipWindow]);
 
+  // Sinkronkan tema (dark/light) & ukuran font secara real-time ke jendela PiP saat berubah
+  useEffect(() => {
+    if (!pipWindow || pipWindow.closed) return undefined;
+    const syncRoot = () => {
+      if (pipWindow.closed) return;
+      pipWindow.document.documentElement.classList.toggle(
+        "dark",
+        document.documentElement.classList.contains("dark"),
+      );
+      if (document.documentElement.style.fontSize) {
+        pipWindow.document.documentElement.style.fontSize = document.documentElement.style.fontSize;
+      }
+    };
+    syncRoot();
+    const observer = new MutationObserver(syncRoot);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
+    return () => observer.disconnect();
+  }, [pipWindow]);
+
   // Tutup PiP saat unmount
   useEffect(() => () => {
     if (pipWindow && !pipWindow.closed) pipWindow.close();
@@ -172,6 +205,22 @@ export function PomodoroProvider({ children }) {
     const id = window.setInterval(() => setRemaining((r) => Math.max(0, r - 1)), 1000);
     return () => window.clearInterval(id);
   }, [running]);
+
+  // Sinkronkan pengaturan Pomodoro jika diubah dari halaman Profil
+  useEffect(() => {
+    const onSettingsChanged = (e) => {
+      const next = e.detail || loadFocusSettings();
+      setSettings(next);
+      setDraft({ focus: String(next.focusMinutes), rest: String(next.breakMinutes), sessions: String(next.sessions) });
+      if (!running && !paused) {
+        const nextDur = durationFor(mode, next);
+        setDuration(nextDur);
+        setRemaining(nextDur);
+      }
+    };
+    window.addEventListener("getdone:focus-settings-changed", onSettingsChanged);
+    return () => window.removeEventListener("getdone:focus-settings-changed", onSettingsChanged);
+  }, [running, paused, mode]);
 
   // ── switchMode ──
   const switchMode = useCallback(
@@ -206,6 +255,13 @@ export function PomodoroProvider({ children }) {
     if (!running || remaining > 0) return;
     setRunning(false);
     setPaused(false);
+    const prefs = loadPreferences();
+    playAlarm({
+      sound: prefs.alarmSound,
+      volume: prefs.alarmVolume,
+      customSrc: prefs.customAlarmDataUrl,
+    });
+
     if (mode === "focus") {
       const total = Math.min(settings.sessions, completed + 1);
       setCompleted(total);
@@ -214,6 +270,15 @@ export function PomodoroProvider({ children }) {
         taskTitle: selectedTask?.title,
         durationMinutes: settings.focusMinutes,
       });
+      const toastTitle = "Sesi Fokus Selesai!";
+      const toastBody =
+        total >= settings.sessions
+          ? `Selamat! ${total} sesi fokus telah tercapai.`
+          : `Sesi ${total}/${settings.sessions} selesai. Waktunya istirahat sejenak.`;
+      setAlarmToast({ id: Date.now(), title: toastTitle, body: toastBody });
+      if (prefs.desktopNotification) {
+        sendPomodoroNotification(toastTitle, toastBody);
+      }
       if (total >= settings.sessions) {
         setStateLabel("Target sesi tercapai!");
         setMessage({
@@ -237,6 +302,12 @@ export function PomodoroProvider({ children }) {
         warn: false,
       });
     } else {
+      const toastTitle = "Waktu Istirahat Selesai!";
+      const toastBody = "Saatnya kembali ke sesi fokus berikutnya.";
+      setAlarmToast({ id: Date.now(), title: toastTitle, body: toastBody });
+      if (prefs.desktopNotification) {
+        sendPomodoroNotification(toastTitle, toastBody);
+      }
       if (settings.autoStart) {
         beginPhase("focus");
         setMessage({ text: "Waktu istirahat selesai. Sesi fokus berikutnya dimulai otomatis.", warn: false });
@@ -257,6 +328,11 @@ export function PomodoroProvider({ children }) {
         warn: false,
       });
       return;
+    }
+    setAlarmToast(null);
+    const prefs = loadPreferences();
+    if (prefs.desktopNotification && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
     }
     if (remaining <= 0) setRemaining(duration);
     setRunning(true);
@@ -413,7 +489,9 @@ export function PomodoroProvider({ children }) {
     currentCycle,
     isPipSupported,
     pipWindow,
+    alarmToast,
     // Actions
+    dismissAlarmToast,
     setDraft,
     setDraftField,
     setSelectedTaskId,

@@ -6,6 +6,7 @@ import CourseDetailModal from "../components/courses/CourseDetailModal.jsx";
 import { useCourses } from "../hooks/useCourses.js";
 import { usePageMeta } from "../hooks/usePageMeta.js";
 import { DAYS, nextOccurrence, withTaskMetrics } from "../services/courseService.js";
+import { loadPreferences } from "../services/preferencesService.js";
 import { loadTasks } from "../services/taskService.js";
 import { getOnboarding } from "../services/academicData.js";
 import { formatLongDate } from "../utils/formatDate.js";
@@ -37,11 +38,18 @@ export default function CoursesPage() {
   });
 
   const { courses, addCourse, updateCourse, removeCourse, setSemesterStatus, setContract } = useCourses();
+  const [prefs, setPrefs] = useState(() => loadPreferences());
+  useEffect(() => {
+    const onPrefs = () => setPrefs(loadPreferences());
+    window.addEventListener("getdone:preferences-changed", onPrefs);
+    return () => window.removeEventListener("getdone:preferences-changed", onPrefs);
+  }, []);
+
   const [tasks] = useState(loadTasks);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("schedule");
+  const [sort, setSort] = useState(() => loadPreferences().coursesDefaultSort);
   const [filter, setFilter] = useState("all");
-  const [semesterFilter, setSemesterFilter] = useState("current");
+  const [semesterFilter, setSemesterFilter] = useState(() => loadPreferences().coursesDefaultSemester);
   const [menuId, setMenuId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [detailId, setDetailId] = useState(null);
@@ -76,9 +84,10 @@ export default function CoursesPage() {
   }, [withMetrics, query, sort, filter, semesterFilter]);
 
   const current = useMemo(() => withMetrics.filter((c) => (c.semesterStatus || "current") === "current"), [withMetrics]);
+  const maxSks = prefs.maxSksLimit || MAX_SKS;
   const totalSks = current.reduce((sum, c) => sum + (Number(c.sks) || 0), 0);
   const totalActive = current.reduce((sum, c) => sum + c.active, 0);
-  const usedPct = Math.min(100, Math.round((totalSks / MAX_SKS) * 100));
+  const usedPct = Math.min(100, Math.round((totalSks / maxSks) * 100));
 
   const plan = getOnboarding();
   const termLabel = plan.semesterTerm === "genap" ? "Genap" : "Ganjil";
@@ -118,7 +127,7 @@ export default function CoursesPage() {
                 <span>{plan.activeSemester ? `Semester ${plan.activeSemester} • ${termLabel} ${plan.academicStartYear}/${Number(plan.academicStartYear) + 1}` : "Semester belum diatur"}</span>
               </div>
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Mata Kuliah Semester {termLabel}</h1>
-              <div className="flex items-center gap-space-md text-text-muted font-body-sm text-body-sm">
+              <div className="flex flex-wrap items-center gap-x-space-md gap-y-1.5 text-text-muted font-body-sm text-body-sm">
                 <span className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-[18px] text-primary-container">school</span>
                   <strong className="text-on-surface font-semibold" id="stat-count">{current.length}</strong>
@@ -230,7 +239,7 @@ export default function CoursesPage() {
                   </svg>
                   <div className="absolute flex flex-col items-center justify-center">
                     <span className="font-headline-sm text-headline-sm font-bold text-on-surface">{totalSks}</span>
-                    <span className="font-label-sm text-label-sm text-text-muted -mt-1">/ {MAX_SKS} SKS</span>
+                    <span className="font-label-sm text-label-sm text-text-muted -mt-1">/ {maxSks} SKS</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-space-xs text-body-sm font-body-sm">
@@ -240,7 +249,7 @@ export default function CoursesPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-surface-dim"></span>
-                    <span className="text-text-muted">{Math.max(0, MAX_SKS - totalSks)} SKS Tersisa (Kapasitas Maks)</span>
+                    <span className="text-text-muted">{Math.max(0, maxSks - totalSks)} SKS Tersisa (Kapasitas Maks)</span>
                   </div>
                   <span className="font-label-sm text-label-sm text-state-done font-medium mt-1">IPK Semester Lalu: 3.84 (Memenuhi Syarat 24 SKS)</span>
                 </div>

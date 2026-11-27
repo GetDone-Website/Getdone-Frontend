@@ -30,6 +30,8 @@ export default function PomodoroTimer({ initialTaskId = "" }) {
     currentCycle,
     isPipSupported,
     pipWindow,
+    alarmToast,
+    dismissAlarmToast,
     MODES,
     modeLabel,
     setDraftField,
@@ -170,6 +172,28 @@ export default function PomodoroTimer({ initialTaskId = "" }) {
             </button>
           </div>
         </div>
+
+        {alarmToast && (
+          <div
+            role="alert"
+            className="w-full mb-space-md px-3.5 py-2.5 rounded-xl bg-primary-container text-on-primary shadow-md flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="material-symbols-outlined text-[20px] animate-bounce flex-shrink-0">notifications_active</span>
+              <div className="min-w-0">
+                <div className="font-label-md text-label-md font-bold leading-tight">{alarmToast.title}</div>
+                <div className="text-xs opacity-90 truncate">{alarmToast.body}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={dismissAlarmToast}
+              className="px-2.5 py-1 rounded-lg bg-surface-clean text-primary font-label-sm text-label-sm font-bold flex-shrink-0"
+            >
+              Tutup
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center p-space-xs bg-surface-muted rounded-full w-full max-w-xs justify-between mb-space-lg" id="timer-modes">
           {MODES.map((m) => (

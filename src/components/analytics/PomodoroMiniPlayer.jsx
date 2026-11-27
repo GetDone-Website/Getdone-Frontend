@@ -15,6 +15,8 @@ function MiniPlayerBody({
   selectedTask,
   ytSrc,
   isPlaylist,
+  alarmToast,
+  dismissAlarmToast,
   start,
   pause,
   reset,
@@ -27,6 +29,27 @@ function MiniPlayerBody({
 
   return (
     <div className="p-3.5 flex flex-col gap-3">
+      {alarmToast && (
+        <div
+          role="alert"
+          className="px-2.5 py-2 rounded-xl bg-primary-container text-on-primary flex items-center justify-between gap-2 shadow-sm"
+        >
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="material-symbols-outlined text-[18px] animate-bounce flex-shrink-0">notifications_active</span>
+            <div className="min-w-0">
+              <div className="text-xs font-bold leading-tight truncate">{alarmToast.title}</div>
+              <div className="text-[11px] opacity-90 truncate">{alarmToast.body}</div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={dismissAlarmToast}
+            className="px-2 py-1 rounded-lg bg-surface-clean text-primary text-[11px] font-bold flex-shrink-0"
+          >
+            OK
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
@@ -160,6 +183,8 @@ export default function PomodoroMiniPlayer() {
     isPlaylist,
     isPipSupported,
     pipWindow,
+    alarmToast,
+    dismissAlarmToast,
     start,
     pause,
     reset,
@@ -234,6 +259,8 @@ export default function PomodoroMiniPlayer() {
     selectedTask,
     ytSrc,
     isPlaylist,
+    alarmToast,
+    dismissAlarmToast,
     start,
     pause,
     reset,
